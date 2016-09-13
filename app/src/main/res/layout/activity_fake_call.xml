@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/blackLight"
+    android:weightSum="10"
+    style="@style/Theme.AppCompat.Light.NoActionBar">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="2"></LinearLayout>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:layout_gravity="center"
+        android:padding="3dp">
+        <ImageView
+            android:id="@+id/user_photo_profile_fake_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/user"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="0.5"></LinearLayout>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="0.8"
+        android:textSize="24sp"
+        android:id="@+id/driver_name_fake_call"
+        android:textColor="@color/white"
+        android:textStyle="bold"
+        android:text="Hamada"
+        android:layout_gravity="center"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="0.8"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:id="@+id/driver_phone_fake_call"
+        android:textColor="@color/white"
+        android:text="01270791661"
+        android:layout_gravity="center"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:weightSum="2"
+        android:orientation="horizontal"
+        android:layout_weight="2">
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_marginLeft="16dp"
+            android:layout_weight="0.5"
+            android:layout_gravity="start"
+            android:layout_height="wrap_content"
+            android:id="@+id/accept_phone"
+            android:src="@drawable/phone"/>
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"></LinearLayout>
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_weight="0.5"
+            android:id="@+id/reject_phone"
+            android:layout_marginRight="16dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/phone_reject"/>
+    </LinearLayout>
+
+
+</LinearLayout>

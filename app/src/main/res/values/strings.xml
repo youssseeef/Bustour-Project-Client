@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">BusTourClientSide</string>
+    <string name="title_activity_drivers_list">DriversListActivity</string>
+    <string name="phone_number">Phone Number</string>
+    <string name="enter_your_phone">Enter your phone</string>
+    <string name="save">Save</string>
+    <string name="trip_enabled">Trip enabled</string>
+    <string name="trip_disabled">Trip disabled</string>
+    <string name="trip_name">Trip Name</string>
+    <string name="driver_name">Driver Name</string>
+    <string name="driver_phone">Driver Phone</string>
+    <string name="title_activity_track_aspecific_trip">Map</string>
+</resources>
