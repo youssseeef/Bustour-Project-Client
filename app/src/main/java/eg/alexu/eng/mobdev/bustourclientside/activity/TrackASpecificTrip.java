@@ -49,7 +49,7 @@ public class TrackASpecificTrip extends FragmentActivity implements OnMapReadyCa
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+        mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
         mLatUserPickUpLocation = getIntent().getStringExtra(Extras.LATITUDE);
         mLongUserPickUpLocation = getIntent().getStringExtra(Extras.LONGITUDE);
         mTripId = getIntent().getStringExtra(Extras.TRIP_ID);
@@ -83,8 +83,8 @@ public class TrackASpecificTrip extends FragmentActivity implements OnMapReadyCa
                 addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        mLongDriverLocation = dataSnapshot.getValue(String.class);
-                        updateMarkerPosition();
+                            mLongDriverLocation = dataSnapshot.getValue(String.class);
+                            updateMarkerPosition();
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
@@ -102,8 +102,8 @@ public class TrackASpecificTrip extends FragmentActivity implements OnMapReadyCa
                 addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        mLatDriverLocation = dataSnapshot.getValue(String.class);
-                        updateMarkerPosition();
+                            mLatDriverLocation = dataSnapshot.getValue(String.class);
+                            updateMarkerPosition();
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
@@ -133,8 +133,12 @@ public class TrackASpecificTrip extends FragmentActivity implements OnMapReadyCa
                 addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        enableTrackingDriver = Boolean.parseBoolean(dataSnapshot.getValue(String.class));
-                        updateMarkerPosition();
+                        if (dataSnapshot.exists()) {
+                            enableTrackingDriver = Boolean.parseBoolean(dataSnapshot.getValue(String.class));
+                            updateMarkerPosition();
+                        } else {
+                            enableTrackingDriver = false;
+                        }
                     }
                     @Override
                     public void onCancelled(DatabaseError databaseError) {

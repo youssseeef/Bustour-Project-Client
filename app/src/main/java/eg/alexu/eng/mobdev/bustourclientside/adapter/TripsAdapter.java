@@ -40,6 +40,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
     private Context mContext;
     private Map<String, ValueEventListener> arrivedValueListener;
     public static boolean activeFakeCall;
+
     public TripsAdapter(Context context) {
         mContext = context;
         activeFakeCall = false;
@@ -58,70 +59,6 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
         initializeView(holder, tripId);
     }
 
-    private void checkOnOff(final ViewHolder holder, final String tripId, final String driverId) {
-        arrivedValueListener.put(tripId, new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-                boolean arrived = Boolean.parseBoolean(dataSnapshot.getValue(String.class));
-                if (arrived) {
-                    dbRef.child(Constants.USERS).
-                            child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                            child(Constants.RING_MODE).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            String ringType = dataSnapshot.getValue(String.class);
-                            if (ringType.equals("0")) {
-                                Intent intent = new Intent(mContext, FakeCallActivity.class);
-                                intent.putExtra(Extras.DRIVER_ID, driverId);
-                                intent.putExtra(Extras.TRIP_ID, tripId);
-                                if(!activeFakeCall) {
-                                    mContext.startActivity(intent);
-                                    activeFakeCall = true;
-                                }
-                            }else {
-                                notifyUser();
-                            }
-                            dbRef.child(Constants.USERS).
-                                    child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                                    child(Constants.TRIPS).
-                                    child(tripId).
-                                    child(Constants.ENABLED).
-                                    setValue("false");
-                            dbRef.child(Constants.USERS).
-                                    child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                                    child(Constants.TRIPS).
-                                    child(tripId).
-                                    child(Constants.ARRIVED).
-                                    setValue("false");
-                            holder.mOnOff.setSelected(false);
-                        }
-
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-        Log.d("lolo", holder.mOnOff.isSelected()+"");
-        if(holder.mOnOff.isEnabled() && holder.mOnOff.isSelected()){
-            DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-            dbRef.child(Constants.USERS).
-                    child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                    child(Constants.TRIPS).
-                    child(tripId).
-                    child(Constants.ARRIVED).addValueEventListener(arrivedValueListener.get(tripId));
-        }
-
-    }
-
     @Override
     public int getItemCount() {
         return mTripsId != null ? mTripsId.size() : 0;
@@ -132,40 +69,21 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
-    private void initializeView(final ViewHolder holder, final String tripId) {
-        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-        dbRef.child(Constants.USERS).
-                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                child(Constants.TRIPS).
-                child(tripId).
-                addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        String locX = dataSnapshot.child(Constants.LOC_X).getValue(String.class);
-                        String locY = dataSnapshot.child(Constants.LOC_Y).getValue(String.class);
-                        String driverId = dataSnapshot.child(Constants.DRIVER_ID).getValue(String.class);
-                        boolean enableTrip = Boolean.parseBoolean(dataSnapshot.child(Constants.ENABLED).getValue(String.class));
-                        if(!(locX == null || locY == null || driverId == null)) {
-                            if (!locX.equals(Constants.NO_VALUE) && !locY.equals(Constants.NO_VALUE)) {
-                                setTripEnabled(holder, enableTrip);
-                            } else if (locX.equals(Constants.NO_VALUE) || locY.equals(Constants.NO_VALUE)) {
-                                setTripDisabled(holder);
-                            }
-                            setTripName(holder, tripId, driverId);
-                            setTripDescription(holder, tripId, driverId);
-                            checkOnOff(holder, tripId, driverId);
-                            addOnClickListenerToOnOff(holder, tripId);
-                            addListenerForSetLocation(holder, tripId);
-                            addOnClickListenerForInfo(holder, tripId, driverId);
-                            addOnClickListenerForTracking(holder, tripId, driverId, locX, locY);
-                        }
-                    }
+    private void addOnClickListenerToOnOff(final ViewHolder holder, final String tripId) {
+        final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+        holder.mOnOff.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (holder.mOnOff.isSelected() && holder.mOnOff.isEnabled()) {
+                    offTrip(dbRef, holder, tripId);
+                    Toast.makeText(v.getContext(), R.string.trip_disabled, Toast.LENGTH_LONG).show();
+                } else if (!holder.mOnOff.isSelected() && holder.mOnOff.isEnabled()) {
+                    onTrip(dbRef, holder, tripId);
+                    Toast.makeText(v.getContext(), R.string.trip_enabled, Toast.LENGTH_LONG).show();
+                }
+            }
+        });
     }
 
     private void addOnClickListenerForTracking(final ViewHolder holder, final String tripId, final String driverId, final String latitude, final String longitude) {
@@ -196,45 +114,6 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
         });
     }
 
-    private void addOnClickListenerToOnOff(final ViewHolder holder, final String tripId) {
-        final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-
-        holder.mOnOff.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (holder.mOnOff.isSelected() && holder.mOnOff.isEnabled()) {
-                    holder.mOnOff.setSelected(false);
-                    dbRef.child(Constants.USERS).
-                            child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                            child(Constants.TRIPS).
-                            child(tripId).
-                            child(Constants.ENABLED).
-                            setValue("false");
-                    dbRef.child(Constants.USERS).
-                            child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                            child(Constants.TRIPS).
-                            child(tripId).
-                            child(Constants.ARRIVED).removeEventListener(arrivedValueListener.get(tripId));
-                    Toast.makeText(v.getContext(), R.string.trip_disabled, Toast.LENGTH_LONG).show();
-                } else if (!holder.mOnOff.isSelected() && holder.mOnOff.isEnabled()) {
-                    holder.mOnOff.setSelected(true);
-                    dbRef.child(Constants.USERS).
-                            child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                            child(Constants.TRIPS).
-                            child(tripId).
-                            child(Constants.ENABLED).
-                            setValue("true");
-                    dbRef.child(Constants.USERS).
-                            child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
-                            child(Constants.TRIPS).
-                            child(tripId).
-                            child(Constants.ARRIVED).addValueEventListener(arrivedValueListener.get(tripId));
-                    Toast.makeText(v.getContext(), R.string.trip_enabled, Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-    }
-
     private void addListenerForSetLocation(final ViewHolder holder, final String tripId) {
         holder.mSetLoc.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -244,6 +123,36 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
                 v.getContext().startActivity(intent);
             }
         });
+    }
+
+    private void onTrip(DatabaseReference dbRef, ViewHolder holder, String tripId) {
+        holder.mOnOff.setSelected(true);
+        dbRef.child(Constants.USERS).
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                child(Constants.TRIPS).
+                child(tripId).
+                child(Constants.ENABLED).
+                setValue("true");
+        dbRef.child(Constants.USERS).
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                child(Constants.TRIPS).
+                child(tripId).
+                child(Constants.ARRIVED).addValueEventListener(arrivedValueListener.get(tripId));
+    }
+
+    private void offTrip(DatabaseReference dbRef, ViewHolder holder, String tripId) {
+        holder.mOnOff.setSelected(false);
+        dbRef.child(Constants.USERS).
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                child(Constants.TRIPS).
+                child(tripId).
+                child(Constants.ENABLED).
+                setValue("false");
+        dbRef.child(Constants.USERS).
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                child(Constants.TRIPS).
+                child(tripId).
+                child(Constants.ARRIVED).removeEventListener(arrivedValueListener.get(tripId));
     }
 
     private void setTripDisabled(ViewHolder holder) {
@@ -307,7 +216,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
         Intent intent = new Intent(mContext, TripsAdapter.class);
         PendingIntent pIntent = PendingIntent.getActivity(mContext, (int) System.currentTimeMillis(), intent, 0);
 
-        Notification n  = new Notification.Builder(mContext)
+        Notification n = new Notification.Builder(mContext)
                 .setContentTitle("Bus Tour")
                 .setContentText("Driver is near")
                 .setSmallIcon(R.drawable.bus_logo)
@@ -319,7 +228,133 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
         notificationManager.notify(0, n);
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    private void checkOnOff(final ViewHolder holder, final String tripId, final String driverId) {
+        initializeTripListener(holder, tripId, driverId);
+        if (holder.mOnOff.isEnabled() && holder.mOnOff.isSelected()) {
+            DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+            dbRef.child(Constants.USERS).
+                    child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                    child(Constants.TRIPS).
+                    child(tripId).
+                    child(Constants.ARRIVED).addValueEventListener(arrivedValueListener.get(tripId));
+        }
+
+    }
+
+    private void initializeTripListener(final ViewHolder holder, final String tripId, final String driverId) {
+        arrivedValueListener.put(tripId, new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+                    boolean arrived = Boolean.parseBoolean(dataSnapshot.getValue(String.class));
+                    if (arrived) {
+                        checkIsEnabled(dbRef, holder, tripId, driverId);
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void checkIsEnabled(final DatabaseReference dbRef, final ViewHolder holder, final String tripId, final String driverId) {
+        dbRef.child(Constants.USERS).
+        child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+        child(Constants.TRIPS).
+        child(tripId).
+        child(Constants.ENABLED).
+        addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    boolean enabled = Boolean.parseBoolean(dataSnapshot.getValue(String.class));
+                    if (enabled) {
+                        launchNotification(dbRef, holder, tripId, driverId);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void launchNotification(final DatabaseReference dbRef, final ViewHolder holder, final String tripId, final String driverId) {
+        dbRef.child(Constants.USERS).
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                child(Constants.RING_MODE).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String ringType = dataSnapshot.getValue(String.class);
+                if (ringType.equals("0")) {
+                    Intent intent = new Intent(mContext, FakeCallActivity.class);
+                    intent.putExtra(Extras.DRIVER_ID, driverId);
+                    intent.putExtra(Extras.TRIP_ID, tripId);
+                    if (!activeFakeCall) {
+                        mContext.startActivity(intent);
+                        activeFakeCall = true;
+                    }
+                } else {
+                    notifyUser();
+                }
+                offTrip(dbRef, holder, tripId);
+                dbRef.child(Constants.USERS).
+                        child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                        child(Constants.TRIPS).
+                        child(tripId).
+                        child(Constants.ARRIVED).
+                        setValue("false");
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+    }
+
+    private void initializeView(final ViewHolder holder, final String tripId) {
+        DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+        dbRef.child(Constants.USERS).
+                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                child(Constants.TRIPS).
+                child(tripId).
+                addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            String locX = dataSnapshot.child(Constants.LOC_X).getValue(String.class);
+                            String locY = dataSnapshot.child(Constants.LOC_Y).getValue(String.class);
+                            String driverId = dataSnapshot.child(Constants.DRIVER_ID).getValue(String.class);
+                            boolean enableTrip = Boolean.parseBoolean(dataSnapshot.child(Constants.ENABLED).getValue(String.class));
+                            if (!locX.equals(Constants.NO_VALUE) && !locY.equals(Constants.NO_VALUE)) {
+                                setTripEnabled(holder, enableTrip);
+                            } else if (locX.equals(Constants.NO_VALUE) || locY.equals(Constants.NO_VALUE)) {
+                                setTripDisabled(holder);
+                            }
+                            setTripName(holder, tripId, driverId);
+                            setTripDescription(holder, tripId, driverId);
+                            checkOnOff(holder, tripId, driverId);
+                            addOnClickListenerToOnOff(holder, tripId);
+                            addListenerForSetLocation(holder, tripId);
+                            addOnClickListenerForInfo(holder, tripId, driverId);
+                            addOnClickListenerForTracking(holder, tripId, driverId, locX, locY);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+   public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView mTripName;
         private TextView mTripDescription;
         private ImageView mOnOff;
@@ -338,3 +373,6 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
         }
     }
 }
+
+
+

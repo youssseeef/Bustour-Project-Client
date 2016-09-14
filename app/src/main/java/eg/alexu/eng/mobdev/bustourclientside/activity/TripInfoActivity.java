@@ -92,7 +92,8 @@ public class TripInfoActivity extends AppCompatActivity {
                 addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        mTripDescription.setText(dataSnapshot.getValue(String.class));
+                        if (dataSnapshot.exists())
+                            mTripDescription.setText(dataSnapshot.getValue(String.class));
                     }
 
                     @Override
@@ -112,7 +113,8 @@ public class TripInfoActivity extends AppCompatActivity {
                 addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        mTripName.setText(dataSnapshot.getValue(String.class));
+                        if (dataSnapshot.exists())
+                            mTripName.setText(dataSnapshot.getValue(String.class));
                     }
 
                     @Override
@@ -130,7 +132,8 @@ public class TripInfoActivity extends AppCompatActivity {
                 addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        mDriverPhone.setText(dataSnapshot.getValue(String.class));
+                        if (dataSnapshot.exists())
+                            mDriverPhone.setText(dataSnapshot.getValue(String.class));
                     }
 
                     @Override
@@ -148,7 +151,8 @@ public class TripInfoActivity extends AppCompatActivity {
                 addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        mDriverName.setText(dataSnapshot.getValue(String.class));
+                        if (dataSnapshot.exists())
+                            mDriverName.setText(dataSnapshot.getValue(String.class));
                     }
 
                     @Override

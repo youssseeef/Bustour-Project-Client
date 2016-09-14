@@ -22,9 +22,7 @@ import eg.alexu.eng.mobdev.bustourclientside.R;
 import eg.alexu.eng.mobdev.bustourclientside.adapter.TripsAdapter;
 import eg.alexu.eng.mobdev.bustourclientside.utilities.Constants;
 
-/**
- * Created by Paula B. Bassily on 11/09/2016.
- */
+
 public class TripsActivity extends AppCompatActivity {
 
     private RecyclerView mTripRecyclerView;
@@ -59,8 +57,10 @@ public class TripsActivity extends AppCompatActivity {
     private void modifyTrip(DataSnapshot dataSnapshot) {
         HashMap<String, HashMap<String, String>> map = (HashMap<String, HashMap<String,String>>) dataSnapshot.getValue();
         List<String> tripsId = new ArrayList<>();
-        for(String s : map.keySet()) {
-            tripsId.add(s);
+        if (map != null) {
+            for (String s : map.keySet()) {
+                tripsId.add(s);
+            }
         }
         mAdapter.updateData(tripsId);
     }
