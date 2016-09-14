@@ -112,7 +112,9 @@ public class TrackASpecificTrip extends FragmentActivity implements OnMapReadyCa
     }
 
     private void updateMarkerPosition() {
-        if(mLatDriverLocation != null && mLongDriverLocation != null) {
+        if(mLatDriverLocation != null && mLongDriverLocation != null &&
+                !mLatDriverLocation.equals(Constants.NO_VALUE) &&
+                !mLongDriverLocation.equals(Constants.NO_VALUE)) {
             LatLng driverLoc = new LatLng(Double.parseDouble(mLatDriverLocation),
                     Double.parseDouble(mLongDriverLocation));
             marker.setPosition(driverLoc);

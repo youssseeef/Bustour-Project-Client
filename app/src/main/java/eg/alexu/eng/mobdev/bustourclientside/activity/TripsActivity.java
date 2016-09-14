@@ -5,6 +5,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -27,11 +29,13 @@ public class TripsActivity extends AppCompatActivity {
 
     private RecyclerView mTripRecyclerView;
     private TripsAdapter mAdapter;
+    private TextView mThereAreNoTrips;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.trips_list);
+        mThereAreNoTrips = (TextView) findViewById(R.id.there_are_no_trips);
         initializeRecyclerView();
         listenerForTrip();
     }
@@ -63,6 +67,13 @@ public class TripsActivity extends AppCompatActivity {
             }
         }
         mAdapter.updateData(tripsId);
+        if (mAdapter.getItemCount() == 0) {
+            mThereAreNoTrips.setVisibility(View.VISIBLE);
+            mTripRecyclerView.setVisibility(View.GONE);
+        } else {
+            mThereAreNoTrips.setVisibility(View.GONE);
+            mTripRecyclerView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void initializeRecyclerView() {

@@ -272,8 +272,34 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
                 if (dataSnapshot.exists()) {
                     boolean enabled = Boolean.parseBoolean(dataSnapshot.getValue(String.class));
                     if (enabled) {
-                        launchNotification(dbRef, holder, tripId, driverId);
+                        checkDriverEnable(dbRef, holder, tripId, driverId);
                     }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void checkDriverEnable(final DatabaseReference dbRef, final ViewHolder holder, final String tripId, final String driverId) {
+        dbRef.child(Constants.DRIVERS).child(driverId).child(Constants.TRIPS).child(tripId).
+                child(Constants.ENABLE_TRACKING).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    boolean enableDriver = Boolean.parseBoolean(dataSnapshot.getValue(String.class));
+                    if (enableDriver)
+                        launchNotification(dbRef, holder, tripId, driverId);
+                    else
+                        dbRef.child(Constants.USERS).
+                                child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                                child(Constants.TRIPS).
+                                child(tripId).
+                                child(Constants.ARRIVED).
+                                setValue("false");
                 }
             }
 

@@ -10,4 +10,5 @@
     <string name="driver_name">Driver Name</string>
     <string name="driver_phone">Driver Phone</string>
     <string name="title_activity_track_aspecific_trip">Map</string>
+    <string name="there_are_no_trips">There are no trips</string>
 </resources>
