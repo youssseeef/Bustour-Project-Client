@@ -24,6 +24,7 @@ import eg.alexu.eng.mobdev.bustourclientside.utilities.Extras;
 
 public class TrackASpecificTrip extends FragmentActivity implements OnMapReadyCallback {
 
+    private static final double DISTANCE_RADIUS = 200.0;
     private GoogleMap mMap;
     private String mTripId;
     private String mDriverId;
@@ -63,13 +64,13 @@ public class TrackASpecificTrip extends FragmentActivity implements OnMapReadyCa
         LatLng pickUpLocation = new LatLng(Double.parseDouble(mLatUserPickUpLocation),
                 Double.parseDouble(mLongUserPickUpLocation));
         mMap.setTrafficEnabled(true);
-        mMap.addCircle(new CircleOptions().center(pickUpLocation).radius(50.0).visible(true).fillColor(0x30000000).strokeColor(Color.RED).strokeWidth(5));
+        mMap.addCircle(new CircleOptions().center(pickUpLocation).radius(DISTANCE_RADIUS).visible(true).fillColor(0x30000000).strokeColor(Color.RED).strokeWidth(5));
         mMap.addMarker(new MarkerOptions().position(pickUpLocation).title("User Pickup Location"));
         driverMarkerOptions.title("Driver Current Location");
         driverMarkerOptions.position(new LatLng(0.0, 0.0));
         marker = mMap.addMarker(driverMarkerOptions);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(pickUpLocation, 15));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(18), 2000, null);
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
     }
 
     private void addListenerToDriverLocLong() {

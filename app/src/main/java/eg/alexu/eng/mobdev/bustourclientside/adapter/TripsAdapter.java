@@ -21,7 +21,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import eg.alexu.eng.mobdev.bustourclientside.R;
 import eg.alexu.eng.mobdev.bustourclientside.activity.FakeCallActivity;
@@ -35,10 +38,12 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
 
     private List<String> mTripsId;
     private Context mContext;
-    private ValueEventListener arrivedValueListener;
-
+    private Map<String, ValueEventListener> arrivedValueListener;
+    public static boolean activeFakeCall;
     public TripsAdapter(Context context) {
         mContext = context;
+        activeFakeCall = false;
+        arrivedValueListener = new HashMap<>();
     }
 
     @Override
@@ -54,7 +59,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
     }
 
     private void checkOnOff(final ViewHolder holder, final String tripId, final String driverId) {
-        arrivedValueListener = new ValueEventListener() {
+        arrivedValueListener.put(tripId, new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
@@ -70,8 +75,10 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
                                 Intent intent = new Intent(mContext, FakeCallActivity.class);
                                 intent.putExtra(Extras.DRIVER_ID, driverId);
                                 intent.putExtra(Extras.TRIP_ID, tripId);
-                                if(!FakeCallActivity.active)
+                                if(!activeFakeCall) {
                                     mContext.startActivity(intent);
+                                    activeFakeCall = true;
+                                }
                             }else {
                                 notifyUser();
                             }
@@ -80,6 +87,12 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
                                     child(Constants.TRIPS).
                                     child(tripId).
                                     child(Constants.ENABLED).
+                                    setValue("false");
+                            dbRef.child(Constants.USERS).
+                                    child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
+                                    child(Constants.TRIPS).
+                                    child(tripId).
+                                    child(Constants.ARRIVED).
                                     setValue("false");
                             holder.mOnOff.setSelected(false);
                         }
@@ -96,7 +109,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        };
+        });
         Log.d("lolo", holder.mOnOff.isSelected()+"");
         if(holder.mOnOff.isEnabled() && holder.mOnOff.isSelected()){
             DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
@@ -104,7 +117,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
                     child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
                     child(Constants.TRIPS).
                     child(tripId).
-                    child(Constants.ARRIVED).addValueEventListener(arrivedValueListener);
+                    child(Constants.ARRIVED).addValueEventListener(arrivedValueListener.get(tripId));
         }
 
     }
@@ -132,18 +145,20 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
                         String locY = dataSnapshot.child(Constants.LOC_Y).getValue(String.class);
                         String driverId = dataSnapshot.child(Constants.DRIVER_ID).getValue(String.class);
                         boolean enableTrip = Boolean.parseBoolean(dataSnapshot.child(Constants.ENABLED).getValue(String.class));
-                        if (!locX.equals(Constants.NO_VALUE) && !locY.equals(Constants.NO_VALUE)) {
-                            setTripEnabled(holder, enableTrip);
-                        } else if (locX.equals(Constants.NO_VALUE) || locY.equals(Constants.NO_VALUE)) {
-                            setTripDisabled(holder);
+                        if(!(locX == null || locY == null || driverId == null)) {
+                            if (!locX.equals(Constants.NO_VALUE) && !locY.equals(Constants.NO_VALUE)) {
+                                setTripEnabled(holder, enableTrip);
+                            } else if (locX.equals(Constants.NO_VALUE) || locY.equals(Constants.NO_VALUE)) {
+                                setTripDisabled(holder);
+                            }
+                            setTripName(holder, tripId, driverId);
+                            setTripDescription(holder, tripId, driverId);
+                            checkOnOff(holder, tripId, driverId);
+                            addOnClickListenerToOnOff(holder, tripId);
+                            addListenerForSetLocation(holder, tripId);
+                            addOnClickListenerForInfo(holder, tripId, driverId);
+                            addOnClickListenerForTracking(holder, tripId, driverId, locX, locY);
                         }
-                        setTripName(holder, tripId, driverId);
-                        setTripDescription(holder, tripId, driverId);
-                        checkOnOff(holder, tripId, driverId);
-                        addOnClickListenerToOnOff(holder, tripId);
-                        addListenerForSetLocation(holder, tripId);
-                        addOnClickListenerForInfo(holder, tripId, driverId);
-                        addOnClickListenerForTracking(holder, tripId, driverId, locX, locY);
                     }
 
                     @Override
@@ -199,7 +214,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
                             child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
                             child(Constants.TRIPS).
                             child(tripId).
-                            child(Constants.ARRIVED).removeEventListener(arrivedValueListener);
+                            child(Constants.ARRIVED).removeEventListener(arrivedValueListener.get(tripId));
                     Toast.makeText(v.getContext(), R.string.trip_disabled, Toast.LENGTH_LONG).show();
                 } else if (!holder.mOnOff.isSelected() && holder.mOnOff.isEnabled()) {
                     holder.mOnOff.setSelected(true);
@@ -213,7 +228,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.ViewHolder> 
                             child(FirebaseAuth.getInstance().getCurrentUser().getUid()).
                             child(Constants.TRIPS).
                             child(tripId).
-                            child(Constants.ARRIVED).addValueEventListener(arrivedValueListener);
+                            child(Constants.ARRIVED).addValueEventListener(arrivedValueListener.get(tripId));
                     Toast.makeText(v.getContext(), R.string.trip_enabled, Toast.LENGTH_LONG).show();
                 }
             }

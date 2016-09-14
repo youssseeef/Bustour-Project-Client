@@ -27,6 +27,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import eg.alexu.eng.mobdev.bustourclientside.R;
+import eg.alexu.eng.mobdev.bustourclientside.adapter.TripsAdapter;
 import eg.alexu.eng.mobdev.bustourclientside.utilities.Constants;
 import eg.alexu.eng.mobdev.bustourclientside.utilities.Extras;
 
@@ -38,7 +39,6 @@ public class FakeCallActivity extends AppCompatActivity {
     private String mDriverId;
     private ImageView mAcceptPhone;
     private ImageView mRefusePhone;
-    public static boolean active;
     private MediaPlayer mp;
     private Animation slideLeft;
     private Animation slideRight;
@@ -46,38 +46,35 @@ public class FakeCallActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(active)
-            finish();
-        else {
-            playMusic();
-            setContentView(R.layout.activity_fake_call);
-            mDriverId = getIntent().getStringExtra(Extras.DRIVER_ID);
-            mDriverImage = (ImageView) findViewById(R.id.user_photo_profile_fake_call);
-            mDriverName = (TextView) findViewById(R.id.driver_name_fake_call);
-            mDriverPhone = (TextView) findViewById(R.id.driver_phone_fake_call);
-            mAcceptPhone = (ImageView) findViewById(R.id.accept_phone);
-            mRefusePhone = (ImageView) findViewById(R.id.reject_phone);
-            slideLeft =  AnimationUtils.loadAnimation(this,R.anim.slide_left);
-            slideRight =  AnimationUtils.loadAnimation(this,R.anim.slide_right);
-            mAcceptPhone.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    slideRight();
-                    finish();
-                }
-            });
-            mRefusePhone.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    slideLeft();
-                    finish();
-                }
-            });
-            setDriverName();
-            setDriverPhone();
-            setDriverImage();
-        }
-        active = true;
+        TripsAdapter.activeFakeCall = true;
+        playMusic();
+        setContentView(R.layout.activity_fake_call);
+        mDriverId = getIntent().getStringExtra(Extras.DRIVER_ID);
+        mDriverImage = (ImageView) findViewById(R.id.user_photo_profile_fake_call);
+        mDriverName = (TextView) findViewById(R.id.driver_name_fake_call);
+        mDriverPhone = (TextView) findViewById(R.id.driver_phone_fake_call);
+        mAcceptPhone = (ImageView) findViewById(R.id.accept_phone);
+        mRefusePhone = (ImageView) findViewById(R.id.reject_phone);
+        slideLeft = AnimationUtils.loadAnimation(this, R.anim.slide_left);
+        slideRight = AnimationUtils.loadAnimation(this, R.anim.slide_right);
+        mAcceptPhone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                slideRight();
+                finish();
+            }
+        });
+        mRefusePhone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                slideLeft();
+                finish();
+            }
+        });
+        setDriverName();
+        setDriverPhone();
+        setDriverImage();
+
     }
 
     private void slideRight() {
@@ -93,21 +90,8 @@ public class FakeCallActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-        active = true;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        active = false;
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
-        active = false;
     }
 
     private void setDriverImage() {
@@ -121,7 +105,7 @@ public class FakeCallActivity extends AppCompatActivity {
                         String urlString = dataSnapshot.getValue(String.class);
                         if (urlString != null) {
                             Glide.with(mDriverImage.getContext())
-                                    .load(FirebaseAuth.getInstance().getCurrentUser().getPhotoUrl())
+                                    .load(urlString)
                                     .asBitmap()
                                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                                     .placeholder(R.drawable.user)
@@ -150,6 +134,7 @@ public class FakeCallActivity extends AppCompatActivity {
     @Override
     public void finish() {
         clearMusic();
+        TripsAdapter.activeFakeCall = false;
         super.finish();
     }
 
@@ -197,8 +182,9 @@ public class FakeCallActivity extends AppCompatActivity {
             mp = null;
         }
     }
+
     private void playMusic() {
-        if(mp != null) {
+        if (mp != null) {
             clearMusic();
         }
         mp = MediaPlayer.create(this, R.raw.ringphone);
