@@ -35,7 +35,10 @@ public class SplashActivity extends AppCompatActivity {
 
         Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/main_font.ttf");
 
+
+        assert tx != null;
         tx.setTypeface(custom_font);
+        assert getSupportActionBar() != null;
         getSupportActionBar().hide();
 
 
@@ -60,7 +63,10 @@ public class SplashActivity extends AppCompatActivity {
 
             ActivityOptionsCompat options = ActivityOptionsCompat.
                     makeSceneTransitionAnimation(this, imageView, "driver_icon");
-            startActivity(intent, options.toBundle());
+            if (options != null)
+                startActivity(intent, options.toBundle());
+            else
+                startActivity(intent);
         } else {
             startActivity(intent);
         }

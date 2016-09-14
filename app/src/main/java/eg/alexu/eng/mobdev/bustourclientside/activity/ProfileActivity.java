@@ -135,10 +135,10 @@ public class ProfileActivity extends AppCompatActivity {
     public void setProfile(String fullName, String phone, String ringType) {
         mProfileName.setText(fullName);
         mProfilePhone.setText(phone);
-        if (ringType.equals("0")) {
-            mRingingModeRadioGroup.check(R.id.call_profile);
-        } else if (ringType.equals("1")) {
+        if (ringType != null && ringType.equals("1")) {
             mRingingModeRadioGroup.check(R.id.notification_profile);
+        } else {
+            mRingingModeRadioGroup.check(R.id.call_profile);
         }
     }
 
