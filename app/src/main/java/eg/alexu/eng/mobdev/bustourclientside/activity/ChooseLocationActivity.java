@@ -1,10 +1,15 @@
 package eg.alexu.eng.mobdev.bustourclientside.activity;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
@@ -25,6 +30,7 @@ public class ChooseLocationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         tripId = getIntent().getStringExtra(Extras.TRIP_ID);
         PlacePicker.IntentBuilder placePickerBuilder = new PlacePicker.IntentBuilder();
+        isGooglePlayServicesAvailable(this);
         try {
             startActivityForResult(placePickerBuilder.build(ChooseLocationActivity.this), PLACE_PICKER_REQUEST);
         } catch (GooglePlayServicesRepairableException e) {
@@ -33,6 +39,18 @@ public class ChooseLocationActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
+    }
+
+    private boolean isGooglePlayServicesAvailable(Activity activity) {
+        GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+        int status = googleApiAvailability.isGooglePlayServicesAvailable(activity);
+        if(status != ConnectionResult.SUCCESS) {
+            if(googleApiAvailability.isUserResolvableError(status)) {
+                googleApiAvailability.getErrorDialog(activity, status, 2404).show();
+            }
+            return false;
+        }
+        return true;
     }
 
     @Override
