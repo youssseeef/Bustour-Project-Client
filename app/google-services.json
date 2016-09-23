@@ -37,7 +37,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAtt2CIbcFQ1jEf0fL0mVX1O99tdWosh9M"
+          "current_key": "AIzaSyALSae58AvYV8ICXoCApHvQRs44DBYzB2E"
         }
       ],
       "services": {
@@ -45,8 +45,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61342361748-j4c08rb40ud7m3urhsbq74ijvibblj3v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
@@ -84,7 +89,7 @@
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyAtt2CIbcFQ1jEf0fL0mVX1O99tdWosh9M"
+          "current_key": "AIzaSyALSae58AvYV8ICXoCApHvQRs44DBYzB2E"
         }
       ],
       "services": {
@@ -92,8 +97,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61342361748-j4c08rb40ud7m3urhsbq74ijvibblj3v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
