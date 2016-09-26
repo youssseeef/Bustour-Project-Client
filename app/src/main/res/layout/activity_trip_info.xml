@@ -35,7 +35,7 @@
             android:layout_height="match_parent"
             android:layout_weight=".7"
             android:gravity="center"
-            android:text="Mahmoud" />
+            android:text="Driver" />
     </LinearLayout>
 
     <LinearLayout
@@ -60,7 +60,7 @@
             android:layout_height="match_parent"
             android:layout_weight=".7"
             android:gravity="center"
-            android:text="01270791661" />
+            android:text="000000000" />
     </LinearLayout>
 
     <LinearLayout
@@ -85,7 +85,7 @@
             android:layout_height="match_parent"
             android:layout_weight=".7"
             android:gravity="center"
-            android:text="School" />
+            android:text="Name" />
     </LinearLayout>
 
     <LinearLayout
@@ -112,7 +112,7 @@
             android:layout_height="match_parent"
             android:layout_weight=".7"
             android:gravity="center"
-            android:text="This trip is for my school, but i dont like school" />
+            android:text="Description" />
     </LinearLayout>
 
     <LinearLayout
